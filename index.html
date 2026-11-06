@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check-in da Convenção Visão 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,100,400..700;1,100..125,800..900&family=Playfair+Display:ital,wght@1,900&display=swap">
+<style>
+  :root {
+    --marinho: #252d74;
+    --marinho-fundo: #1d2461;
+    --azul: #2f73bd;
+    --azul-luz: #3f86d3;
+    --gelo: #c9e4f8;
+    --branco: #ffffff;
+    --erro: #ffc2b8;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--marinho-fundo); }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    color: var(--branco);
+    font: 400 17px/1.5 Archivo, system-ui, sans-serif;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  [hidden] { display: none !important; }
+
+  .ceu {
+    background:
+      radial-gradient(75% 110% at 50% 42%, #4a90dc, var(--azul) 52%, transparent 100%),
+      var(--marinho);
+  }
+
+  /* Marca da convenção: "Sou" sobre o PROTA, "GO" em marinho. */
+  .marca {
+    position: relative;
+    display: block;
+    width: max-content;
+    margin: 0;
+    color: var(--gelo);
+    font-family: Archivo, system-ui, sans-serif;
+    font-stretch: 100%;
+    font-style: italic;
+    font-weight: 900;
+    font-size: var(--marca);
+    line-height: .9;
+    letter-spacing: -0.015em;
+  }
+  .marca .sou {
+    position: absolute;
+    z-index: 1;
+    left: 11%;
+    bottom: 66%;
+    color: var(--marinho);
+    font-family: 'Playfair Display', Georgia, serif;
+    font-stretch: 100%;
+    font-size: 1.05em;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .marca .palavra { position: relative; display: block; }
+  .marca .go { color: var(--marinho); }
+  .marca .evento {
+    position: relative;
+    display: block;
+    margin-top: .5em;
+    color: var(--gelo);
+    font-size: .24em;
+    font-stretch: 125%;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-align: center;
+  }
+
+  .faixa { overflow: hidden; line-height: 0; background: var(--marinho); }
+  .faixa svg { display: block; width: max(100%, 840px); height: auto; }
+
+  :focus-visible { outline: 3px solid var(--gelo); outline-offset: 2px; }
+
+  .topo {
+    --marca: min(11.1vw, 72px);
+    display: flex;
+    justify-content: center;
+    padding: 64px 16px 30px;
+  }
+
+  .pagina {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 28px 16px 148px;
+  }
+  h1.titulo {
+    margin: 0 0 2px;
+    font-size: 30px;
+    font-stretch: 125%;
+    font-style: italic;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .apoio { margin: 0 0 20px; color: var(--gelo); }
+
+  .filtros { display: grid; gap: 10px; margin-bottom: 8px; }
+  .campo {
+    width: 100%;
+    height: 54px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--branco);
+    color: var(--marinho-fundo);
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .campo::placeholder { color: #5a6596; }
+  select.campo { background: var(--gelo); font-size: 16px; }
+  label.oculto {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip-path: inset(50%); white-space: nowrap;
+  }
+
+  .nomes { list-style: none; margin: 0; padding: 0; }
+  .nomes li + li { border-top: 1px solid rgba(201, 228, 248, .25); }
+  .nome {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 62px;
+    padding: 10px 4px;
+    border: 0;
+    background: none;
+    color: var(--branco);
+    text-align: left;
+    cursor: pointer;
+  }
+  .nome strong { font-weight: 600; font-size: 16px; line-height: 1.3; }
+  .nome span { flex: none; color: var(--gelo); font-size: 14px; }
+  .nome[aria-pressed="true"] {
+    margin: 0 -8px;
+    padding: 10px 12px;
+    width: calc(100% + 16px);
+    border-radius: 6px;
+    background: var(--gelo);
+    color: var(--marinho-fundo);
+  }
+  .nome[aria-pressed="true"] span { color: var(--marinho-fundo); }
+  .nome:disabled { cursor: default; color: #aeb9dc; }
+  .nome:disabled strong { font-weight: 400; }
+  .nome:disabled span { color: #aeb9dc; }
+
+  .aviso { padding: 24px 0; color: var(--gelo); }
+  .aviso.erro { color: var(--erro); }
+
+  .confirmar {
+    position: fixed;
+    inset: auto 0 0;
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    background: var(--branco);
+    color: var(--marinho-fundo);
+  }
+  .confirmar div { max-width: 528px; margin: 0 auto; }
+  .confirmar p { margin: 0 0 10px; font-size: 15px; font-weight: 500; line-height: 1.35; }
+  .confirmar p.erro { color: #a32020; }
+  .confirmar :focus-visible { outline-color: var(--marinho); }
+  .botao {
+    width: 100%;
+    min-height: 56px;
+    padding: 12px 20px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--marinho);
+    color: var(--branco);
+    font-size: 19px;
+    font-stretch: 125%;
+    font-style: italic;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .botao:disabled { opacity: .6; cursor: wait; }
+  .botao.leve {
+    background: none;
+    border: 2px solid var(--gelo);
+    color: var(--gelo);
+    font-size: 15px;
+    font-stretch: 100%;
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  /* O número entra em foco, como na troca de lente do exame de vista. */
+  .recibo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 28px 16px 40px;
+    text-align: center;
+  }
+  .recibo .titulo { font-size: 28px; }
+  .recibo .quem { margin: 0; color: var(--gelo); font-weight: 600; overflow-wrap: anywhere; }
+  .lente {
+    display: grid;
+    place-items: center;
+    width: min(70vw, 280px);
+    aspect-ratio: 1;
+    margin: 24px 0;
+    border: 12px solid var(--azul-luz);
+    border-radius: 50%;
+    background: var(--gelo);
+    overflow: hidden;
+  }
+  .lente output {
+    color: var(--marinho);
+    font-size: min(23vw, 96px);
+    font-stretch: 100%;
+    font-style: italic;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    animation: foco 1.5s cubic-bezier(.2, .7, .2, 1) both;
+  }
+  @keyframes foco {
+    from { filter: blur(22px); opacity: .35; transform: scale(1.25); }
+    to { filter: blur(0); opacity: 1; transform: none; }
+  }
+  .recibo .dica { margin: 0 0 24px; color: var(--gelo); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lente output { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="ceu topo">
+    <p class="marca" aria-label="Sou Protagonista, Convenção Visão 2026">
+      <span aria-hidden="true">
+        <span class="sou">Sou</span>
+        <span class="palavra">PROTA<span class="go">GO</span>NISTA</span>
+        <span class="evento">CONVENÇÃO VISÃO 2026</span>
+      </span>
+    </p>
+</header>
+<div class="faixa" aria-hidden="true">
+  <svg viewBox="0 0 1400 100" xmlns="http://www.w3.org/2000/svg" focusable="false">
+    <defs>
+      <g id="t0"><rect width="100" height="100" fill="#252d74"/><path d="M20 80V62h14v18zM42 80V48h14v32zM64 80V36h-8l15-18 15 18h-8v44z" fill="#c9e4f8"/></g>
+      <g id="t1"><rect width="100" height="100" fill="#252d74"/><path d="M0 0h16v46H0zM32 0h16v46H32zM64 0h16v46H64zM16 54h16v46H16zM48 54h16v46H48zM80 54h20v46H80z" fill="#2f73bd"/></g>
+      <g id="t2"><rect width="100" height="100" fill="#c9e4f8"/><path d="M12 40h76v8l-3 2c-1 12-8 17-17 17-10 0-16-6-17-16h-2c-1 10-7 16-17 16-9 0-16-5-17-17l-3-2z" fill="#2f73bd"/></g>
+      <g id="t3"><rect width="100" height="100" fill="#fff"/><path d="m50 30 6 13 14 2-10 10 3 14-13-7-13 7 3-14-10-10 14-2z" fill="#252d74"/><path d="M50 12v9M24 22l6 7M76 22l-6 7M12 50h8M88 50h-8M26 80l5-6M74 80l-5-6" stroke="#252d74" stroke-width="4" stroke-linecap="round"/></g>
+      <g id="t4"><rect width="100" height="100" fill="#252d74"/><path d="M-5 96C22 62 40 34 62-6M18 106C40 70 60 44 88-4M48 106c14-28 30-48 58-82" fill="none" stroke="#c9e4f8" stroke-width="7" stroke-linecap="round"/></g>
+      <g id="t5"><rect width="100" height="100" fill="#2f73bd"/><path d="M38 14h24l3 18H35zM38 86h24l3-18H35z" fill="#c9e4f8"/><circle cx="50" cy="50" r="23" fill="#2f73bd" stroke="#c9e4f8" stroke-width="7"/><path d="M50 37v14l9 6" fill="none" stroke="#c9e4f8" stroke-width="5" stroke-linecap="round"/></g>
+      <g id="t6"><rect width="100" height="100" fill="#c9e4f8"/><text x="50" y="66" text-anchor="middle" fill="#252d74" font-family="Archivo, sans-serif" font-size="46" font-weight="900" font-style="italic">GO</text></g>
+      <g id="t7"><rect width="100" height="100" fill="#fff"/><path d="m-4 40 40-44M-4 76 34 34M46 26 72-2M6 104l34-38M50 58l40-44M42 104l18-20M70 72l34-38" fill="none" stroke="#2f73bd" stroke-width="6" stroke-linecap="round"/></g>
+      <g id="t8"><rect width="100" height="100" fill="#252d74"/><path d="M14 42h72M18 42c-2 18 5 25 15 25s15-8 14-23M82 42c2 18-5 25-15 25s-15-8-14-23M47 45h6" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/></g>
+      <g id="t9"><rect width="100" height="100" fill="#2f73bd"/><path d="M32 18h36v8h14c0 15-7 22-17 25-3 5-6 7-10 8v11h9v10H36V70h9V59c-4-1-7-3-10-8-10-3-17-10-17-25h14zm0 16h-6c1 5 3 8 6 10zm36 0v10c3-2 5-5 6-10z" fill="#252d74"/></g>
+      <g id="t10"><rect width="100" height="100" fill="#c9e4f8"/><path d="M0 62 50 20l50 42v26L50 46 0 88z" fill="#252d74"/></g>
+    </defs>
+    <use href="#t0"/><use href="#t1" x="100"/><use href="#t2" x="200"/><use href="#t3" x="300"/><use href="#t4" x="400"/><use href="#t5" x="500"/><use href="#t6" x="600"/><use href="#t7" x="700"/><use href="#t8" x="800"/><use href="#t9" x="900"/><use href="#t10" x="1000"/><use href="#t2" x="1100"/><use href="#t3" x="1200"/><use href="#t1" x="1300"/>
+  </svg>
+</div>
+
+<main class="pagina" id="telaLista">
+  <h1 class="titulo">Faça seu check-in</h1>
+  <p class="apoio">Encontre seu nome e toque nele.</p>
+
+  <div class="filtros">
+    <label class="oculto" for="busca">Buscar nome</label>
+    <input class="campo" id="busca" type="search" placeholder="Digite seu nome" autocomplete="off" disabled>
+    <label class="oculto" for="loja">Filtrar por loja</label>
+    <select class="campo" id="loja" disabled><option value="">Todas as lojas</option></select>
+  </div>
+
+  <p class="aviso" id="aviso" role="status">Carregando a lista de nomes…</p>
+  <ul class="nomes" id="nomes"></ul>
+</main>
+
+<section class="confirmar" id="confirmar" hidden>
+  <div>
+    <p id="selecionado" aria-live="polite"></p>
+    <button class="botao" id="finalizar" type="button">Finalizar check-in</button>
+  </div>
+</section>
+
+<main class="recibo" id="telaRecibo" hidden>
+  <h1 class="titulo">Check-in feito</h1>
+  <p class="quem" id="quem"></p>
+  <div class="lente"><output id="numero"></output></div>
+  <p class="dica">Este é o seu número do sorteio. Tire um print para guardar.</p>
+  <button class="botao leve" id="outro" type="button">Fazer outro check-in neste celular</button>
+</main>
+
+<script>
+  // Cole aqui o link /exec gerado ao implantar o script no Google.
+  var API_URL = '';
+  var CHAVE_APARELHO = 'checkin.aparelho';
+  var CHAVE_RECIBO = 'checkin.recibo';
+  var MAX_TENTATIVAS = 3;
+
+  var el = function (id) { return document.getElementById(id); };
+  var pessoas = [];
+  var escolhido = null;
+  var enviando = false;
+
+  function lerLocal(chave) {
+    try { return localStorage.getItem(chave); } catch (e) { return null; }
+  }
+  function gravarLocal(chave, valor) {
+    try { localStorage.setItem(chave, valor); } catch (e) {}
+  }
+  function apagarLocal(chave) {
+    try { localStorage.removeItem(chave); } catch (e) {}
+  }
+
+  function novoId() {
+    var bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    return Array.prototype.map.call(bytes, function (b) {
+      return ('0' + b.toString(16)).slice(-2);
+    }).join('');
+  }
+  var aparelho = lerLocal(CHAVE_APARELHO) || novoId();
+  gravarLocal(CHAVE_APARELHO, aparelho);
+
+  function simplificar(texto) {
+    return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
+  }
+
+  function comoJson(resposta) {
+    if (!resposta.ok) throw new Error('HTTP ' + resposta.status);
+    return resposta.json();
+  }
+
+  function mostrarAviso(mensagem, erro) {
+    var aviso = el('aviso');
+    aviso.textContent = mensagem;
+    aviso.className = erro ? 'aviso erro' : 'aviso';
+  }
+
+  function carregar() {
+    if (!API_URL) {
+      mostrarAviso('O check-in ainda não foi aberto.');
+      return;
+    }
+    fetch(API_URL + '?api=lista')
+      .then(comoJson)
+      .then(function (lista) {
+        pessoas = lista;
+        preencherLojas();
+        el('busca').disabled = false;
+        el('loja').disabled = false;
+        desenhar();
+      })
+      .catch(function () {
+        mostrarAviso('A lista não carregou. Recarregue a página para tentar de novo.', true);
+      });
+  }
+
+  function preencherLojas() {
+    var lojas = pessoas
+      .map(function (p) { return p.loja; })
+      .filter(function (l, i, todas) { return l && todas.indexOf(l) === i; })
+      .sort(function (a, b) {
+        return a.localeCompare(b, 'pt-BR', { numeric: true });
+      });
+    lojas.forEach(function (loja) {
+      var opcao = document.createElement('option');
+      opcao.value = loja;
+      opcao.textContent = loja;
+      el('loja').appendChild(opcao);
+    });
+  }
+
+  function desenhar() {
+    var termo = simplificar(el('busca').value.trim());
+    var loja = el('loja').value;
+    var visiveis = pessoas.filter(function (p) {
+      return (!loja || p.loja === loja) &&
+        simplificar(p.nome).indexOf(termo) !== -1;
+    });
+
+    var lista = el('nomes');
+    lista.textContent = '';
+    visiveis.forEach(function (p) {
+      var item = document.createElement('li');
+      var botao = document.createElement('button');
+      var nome = document.createElement('strong');
+      var lado = document.createElement('span');
+      botao.type = 'button';
+      botao.className = 'nome';
+      botao.disabled = p.feito;
+      botao.setAttribute('aria-pressed', String(escolhido === p.nome));
+      nome.textContent = p.nome;
+      lado.textContent = p.feito ? 'Check-in feito' : p.loja;
+      botao.appendChild(nome);
+      botao.appendChild(lado);
+      botao.addEventListener('click', function () { escolher(p.nome); });
+      item.appendChild(botao);
+      lista.appendChild(item);
+    });
+
+    var aviso = el('aviso');
+    aviso.className = 'aviso';
+    aviso.textContent = 'Nenhum nome encontrado. Confira a grafia ou escolha outra loja.';
+    aviso.hidden = visiveis.length > 0;
+  }
+
+  function escolher(nome) {
+    escolhido = nome;
+    el('selecionado').textContent = nome;
+    el('selecionado').className = '';
+    el('confirmar').hidden = false;
+    desenhar();
+  }
+
+  function finalizar(tentativa) {
+    if (!escolhido) return;
+    enviando = true;
+    el('finalizar').disabled = true;
+    el('finalizar').textContent = 'Finalizando…';
+
+    function tentarDeNovo() {
+      if (tentativa < MAX_TENTATIVAS) {
+        setTimeout(function () { finalizar(tentativa + 1); }, 1500 * tentativa);
+      } else {
+        falhar('A conexão falhou. Toque em Finalizar check-in para tentar de novo.');
+      }
+    }
+
+    // text/plain evita a checagem prévia de CORS, que o Google não responde.
+    fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ nome: escolhido, aparelho: aparelho })
+    })
+      .then(comoJson)
+      .then(function (r) {
+        if (r.ok) return mostrarRecibo(r);
+        if (r.motivo === 'ocupado') return tentarDeNovo();
+        if (r.motivo === 'ja_fez') {
+          marcarFeito(escolhido);
+          return falhar('Este nome já tem check-in. Se não foi você, procure a organização.');
+        }
+        falhar('Não foi possível finalizar este check-in. Procure a organização.');
+      })
+      .catch(tentarDeNovo);
+  }
+
+  function falhar(mensagem) {
+    enviando = false;
+    el('finalizar').disabled = false;
+    el('finalizar').textContent = 'Finalizar check-in';
+    el('selecionado').textContent = mensagem;
+    el('selecionado').className = 'erro';
+  }
+
+  function marcarFeito(nome) {
+    pessoas.forEach(function (p) { if (p.nome === nome) p.feito = true; });
+    escolhido = null;
+    el('finalizar').disabled = true;
+    desenhar();
+  }
+
+  function mostrarRecibo(recibo) {
+    gravarLocal(CHAVE_RECIBO, JSON.stringify({ nome: recibo.nome, numero: recibo.numero }));
+    enviando = false;
+    el('quem').textContent = recibo.nome;
+    el('numero').textContent = recibo.numero;
+    el('telaLista').hidden = true;
+    el('confirmar').hidden = true;
+    el('telaRecibo').hidden = false;
+    window.scrollTo(0, 0);
+  }
+
+  function voltarParaLista() {
+    apagarLocal(CHAVE_RECIBO);
+    location.reload();
+  }
+
+  el('busca').addEventListener('input', desenhar);
+  el('loja').addEventListener('change', desenhar);
+  el('finalizar').addEventListener('click', function () {
+    if (!enviando) finalizar(1);
+  });
+  el('outro').addEventListener('click', voltarParaLista);
+
+  var guardado = null;
+  try { guardado = JSON.parse(lerLocal(CHAVE_RECIBO)); } catch (e) {}
+  if (guardado && guardado.numero) {
+    mostrarRecibo(guardado);
+  }
+  carregar();
+</script>
+</body>
+</html>
